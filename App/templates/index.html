@@ -1,13 +1,144 @@
 {% extends "layout.html" %}
-{% block title %}Flask MVC App{% endblock %}
-{% block page %}Flask MVC App{% endblock %}
+{% block title %}UWI STA Campus Map{% endblock %}
+{% block page %}UWI STA Campus Map{% endblock %}
 
 {{ super() }}
 
 {% block content %}
-    <h1>Flask MVC</h1>
-    {% if is_authenticated %}
-        <p> Welcome {{current_user.username}} </p>
-    {% endif %}
-    <p>This is a boileplate flask application which follows the MVC pattern for structuring the project.</p>
+<h1>UWI STA Campus Map</h1>
+
+{% if is_authenticated %}
+  <p>Welcome {{ current_user.username }}</p>
+{% endif %}
+
+<!-- Filter checkboxes -->
+<div id="filters">
+  <label><input type="checkbox" class="filter" value="FST" checked> Faculty of Science & Tech</label>
+  <label><input type="checkbox" class="filter" value="ENG" checked> Faculty of Engineering</label>
+</div>
+
+<!-- Admin: Add Marker Button -->
+{% if is_admin %}
+  <button onclick="openAddModal()">Add Marker</button>
+{% endif %}
+
+<!-- Add Marker Modal -->
+<div id="addModal" style="display:none; position:fixed; top:20%; left:30%; background:#fff; border:1px solid #ccc; padding:20px; z-index:1000;">
+  <h3>Add Marker</h3>
+  <label>Name: <input type="text" id="markerName"></label><br>
+  <label>Latitude: <input type="text" id="markerLat"></label><br>
+  <label>Longitude: <input type="text" id="markerLng"></label><br>
+  <label>Faculty: <input type="text" id="markerFaculty"></label><br>
+  <label>Type: <input type="text" id="markerType"></label><br>
+  <button onclick="submitMarker()">Submit</button>
+  <button onclick="closeAddModal()">Cancel</button>
+</div>
+
+<div id="map"></div>
+
+<style>
+  #map {
+    height: 600px;
+    width: 100%;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    margin-top: 20px;
+  }
+  #filters {
+    margin-top: 10px;
+  }
+  #filters label {
+    margin-right: 15px;
+  }
+</style>
+
+<script>
+  const isAdmin = {{ 'true' if is_admin else 'false' }};
+  console.log("Admin mode:", isAdmin); // 🐞 DEBUG CHECK
+
+  let map;
+  let allMarkers = [];
+
+  function initMap() {
+    map = new google.maps.Map(document.getElementById("map"), {
+      center: { lat: 10.6406, lng: -61.4008 },
+      zoom: 16,
+    });
+
+    fetch('/map-data')
+      .then(response => response.json())
+      .then(locations => {
+        locations.forEach(loc => createMarker(loc));
+        document.querySelectorAll('.filter').forEach(cb => {
+          cb.addEventListener('change', filterMarkers);
+        });
+      });
+  }
+
+  function createMarker(loc) {
+    const marker = new google.maps.Marker({
+      position: { lat: loc.lat, lng: loc.lng },
+      map: map,
+      title: loc.name,
+    });
+
+    marker.faculty = loc.faculty;
+    marker.id = loc.id;
+
+    let content = `<strong>${loc.name}</strong><br>Type: ${loc.type}<br>Faculty: ${loc.faculty};`;
+
+    if (isAdmin) {
+      content += `<br><button onclick="deleteMarker(${loc.id})">Delete</button>`;
+    }
+
+    const infowindow = new google.maps.InfoWindow({ content });
+    marker.addListener("click", () => infowindow.open(map, marker));
+    allMarkers.push(marker);
+  }
+
+  function filterMarkers() {
+    const activeFaculties = Array.from(document.querySelectorAll('.filter:checked')).map(cb => cb.value);
+    allMarkers.forEach(marker => {
+      marker.setMap(activeFaculties.includes(marker.faculty) ? map : null);
+    });
+  }
+
+  function openAddModal() {
+    document.getElementById("addModal").style.display = "block";
+  }
+
+  function closeAddModal() {
+    document.getElementById("addModal").style.display = "none";
+  }
+
+  function submitMarker() {
+    const name = document.getElementById("markerName").value;
+    const lat = parseFloat(document.getElementById("markerLat").value);
+    const lng = parseFloat(document.getElementById("markerLng").value);
+    const faculty = document.getElementById("markerFaculty").value;
+    const type = document.getElementById("markerType").value;
+
+    fetch("/add-marker", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, lat, lng, faculty, type })
+    })
+    .then(res => {
+      if (res.ok) location.reload();
+      else alert("Failed to add marker.");
+    });
+  }
+
+  function deleteMarker(id) {
+    fetch(`/delete-marker/${id}`, { method: "DELETE" })
+      .then(res => {
+        if (res.ok) location.reload();
+        else alert("Failed to delete marker.");
+      });
+  }
+</script>
+
+<script async defer
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBmXPqbPR4nC8Ce8ZB8xaw5UnzpwpljbYA&callback=initMap">
+</script>
 {% endblock %}
