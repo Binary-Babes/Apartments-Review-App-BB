@@ -9,10 +9,10 @@ from App.database import init_db
 from App.config import load_config
 from App.controllers import setup_jwt, add_auth_context
 from App.views import views, setup_admin
-from App.views.map import map_views  # still needed if not included in views list
-
+from App.views.map import map_views
+from App.controllers.marker import marker_views  # ✅ Import marker blueprint
 from flask_login import LoginManager
-from App.models.user import User  # For login manager
+from App.models.user import User
 
 def add_views(app):
     for view in views:
@@ -27,8 +27,9 @@ def create_app(overrides={}):
     photos = UploadSet('photos', TEXT + DOCUMENTS + IMAGES)
     configure_uploads(app, photos)
 
-    add_views(app)  # ✅ Registers index_views and others from views list
-    app.register_blueprint(map_views)  # ✅ Only needed if map_views is not in the list
+    add_views(app)
+    app.register_blueprint(map_views)
+    app.register_blueprint(marker_views)  # ✅ Register marker blueprint
 
     init_db(app)
     jwt = setup_jwt(app)

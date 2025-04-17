@@ -54,6 +54,7 @@
 
 <script>
   const isAdmin = {{ 'true' if is_admin else 'false' }};
+  console.log("Admin mode:", isAdmin); // 🐞 DEBUG CHECK
 
   let map;
   let allMarkers = [];
@@ -84,13 +85,13 @@
     marker.faculty = loc.faculty;
     marker.id = loc.id;
 
-    let content = `<strong>${loc.name}</strong><br>Type: ${loc.type}<br>Faculty: ${loc.faculty}`;
+    let content = `<strong>${loc.name}</strong><br>Type: ${loc.type}<br>Faculty: ${loc.faculty};`;
+
     if (isAdmin) {
       content += `<br><button onclick="deleteMarker(${loc.id})">Delete</button>`;
     }
 
     const infowindow = new google.maps.InfoWindow({ content });
-
     marker.addListener("click", () => infowindow.open(map, marker));
     allMarkers.push(marker);
   }
