@@ -1,17 +1,13 @@
-from flask import Blueprint, redirect, render_template, request, send_from_directory, jsonify
-from App.controllers import create_user, initialize
+from flask import Blueprint, render_template
+from flask_login import current_user
 
-index_views = Blueprint('index_views', __name__, template_folder='../templates')
+index_views = Blueprint('index_views', __name__)
 
 @index_views.route('/', methods=['GET'])
 def index_page():
-    return render_template('index.html')
-
-@index_views.route('/init', methods=['GET'])
-def init():
-    initialize()
-    return jsonify(message='db initialized!')
-
-@index_views.route('/health', methods=['GET'])
-def health_check():
-    return jsonify({'status':'healthy'})
+    return render_template(
+        'index.html',
+        is_authenticated=current_user.is_authenticated,
+        is_admin=(current_user.is_authenticated and getattr(current_user, 'is_admin', False)),
+        current_user=current_user
+    )
