@@ -7,14 +7,12 @@ from App.models import User
 
 auth_views = Blueprint('auth_views', __name__, template_folder='../templates')
 
-
-# ✅ Flask-Login GET login form
+# ✅ GET login form
 @auth_views.route('/login', methods=['GET'])
 def login_page():
     return render_template('login.html')
 
-
-# ✅ Flask-Login POST login action
+# ✅ POST login logic
 @auth_views.route('/login', methods=['POST'])
 def login_action():
     username = request.form.get('username')
@@ -29,24 +27,20 @@ def login_action():
         flash("Invalid username or password.")
         return render_template('login.html')
 
-
-# ✅ Flask-Login logout
+# ✅ Logout redirects to correct endpoint
 @auth_views.route('/logout')
 def logout():
     logout_user()
     flash("Logged out.")
-    return redirect(url_for('auth_views.login_page'))
+    return redirect(url_for('auth_views.login_page'))  # ✅ FIXED
 
-
-# ✅ JWT-based login API (optional use)
+# ✅ Optional: JWT login for APIs
 def login_jwt(username, password):
     user = User.query.filter_by(username=username).first()
     if user and user.check_password(password):
         return create_access_token(identity=username)
     return None
 
-
-# ✅ Setup JWT
 def setup_jwt(app):
     jwt = JWTManager(app)
 
@@ -62,8 +56,7 @@ def setup_jwt(app):
 
     return jwt
 
-
-# ✅ Inject login state into templates
+# ✅ Template context injection
 def add_auth_context(app):
     @app.context_processor
     def inject_user():

@@ -1,52 +1,15 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import login_user, logout_user, current_user
 from flask_jwt_extended import (
     create_access_token, jwt_required, JWTManager, get_jwt_identity, verify_jwt_in_request
 )
 from App.models import User
+from flask import redirect, url_for
 
-auth_views = Blueprint('auth_views', __name__, template_folder='../templates')
-
-
-# ✅ Flask-Login GET login form
-@auth_views.route('/login', methods=['GET'])
-def login_page():
-    return render_template('login.html')
-
-
-# ✅ Flask-Login POST login action
-@auth_views.route('/login', methods=['POST'])
-def login_action():
-    username = request.form.get('username')
-    password = request.form.get('password')
-    user = User.query.filter_by(username=username).first()
-
-    if user and user.check_password(password):
-        login_user(user)
-        flash("Login successful.")
-        return redirect(url_for('index_views.index_page'))
-    else:
-        flash("Invalid username or password.")
-        return render_template('login.html')
-
-
-# ✅ Flask-Login logout
-@auth_views.route('/logout')
-def logout():
-    logout_user()
-    flash("Logged out.")
-    return redirect(url_for('auth_views.login_page'))
-
-
-# ✅ JWT-based login API still available
-def login_jwt(username, password):
+def login(username, password):
     user = User.query.filter_by(username=username).first()
     if user and user.check_password(password):
         return create_access_token(identity=username)
     return None
 
-
-# ✅ Setup JWT
 def setup_jwt(app):
     jwt = JWTManager(app)
 
@@ -62,9 +25,8 @@ def setup_jwt(app):
 
     return jwt
 
-
-# ✅ Inject login state into templates
 def add_auth_context(app):
+    from flask_login import current_user
     @app.context_processor
     def inject_user():
         is_authenticated = current_user.is_authenticated
@@ -73,3 +35,6 @@ def add_auth_context(app):
             current_user=current_user,
             is_admin=getattr(current_user, 'is_admin', False)
         )
+
+# If you had a redirect to login here (e.g., post-logout or error handling), it would be:
+# return redirect(url_for('auth_views.login_page'))  ✅ not .login

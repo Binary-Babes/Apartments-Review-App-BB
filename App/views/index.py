@@ -8,7 +8,7 @@ index_views = Blueprint('index_views', __name__, template_folder='../templates')
 def index_page():
     return render_template(
         'index.html',
-        is_authenticated=True,  # user is already logged in if they reached here
+        is_authenticated=True,
         is_admin=getattr(current_user, 'is_admin', False),
         current_user=current_user
     )
