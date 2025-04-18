@@ -11,12 +11,11 @@ from App.config import load_config
 from App.controllers import setup_jwt, add_auth_context
 from App.views import views
 from App.models.user import User
-
+from App.controllers.initialize import initialize  # ✅ Corrected import path
 
 def add_views(app):
     for view in views:
         app.register_blueprint(view)
-
 
 def create_app(overrides={}):
     app = Flask(__name__, static_url_path='/static')
@@ -34,6 +33,9 @@ def create_app(overrides={}):
     # Init DB
     init_db(app)
 
+    # Initialize data (create bob and prem)
+    initialize(app)  # ✅ Pass the app context
+
     # JWT setup
     jwt = setup_jwt(app)
 
@@ -44,7 +46,7 @@ def create_app(overrides={}):
     def load_user(user_id):
         return User.query.get(int(user_id))
 
-    login_manager.login_view = 'auth_views.login_page'  # ✅ Corrected!
+    login_manager.login_view = 'auth_views.login_page'
     login_manager.init_app(app)
 
     @jwt.invalid_token_loader
