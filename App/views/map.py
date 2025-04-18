@@ -1,13 +1,12 @@
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from App.models.location import Location
-from App.models.user import User
+from flask_login import login_required, current_user
 from App.database import db
+from App.models.location import Location
 
 map_views = Blueprint('map_views', __name__)
 
 @map_views.route('/map-data')
-def map_data():
+def get_markers():
     markers = Location.query.all()
     return jsonify([
         {
@@ -17,20 +16,16 @@ def map_data():
             "lng": m.lng,
             "faculty": m.faculty,
             "type": m.type
-        }
-        for m in markers
+        } for m in markers
     ])
 
 @map_views.route('/add-marker', methods=['POST'])
-@jwt_required()
+@login_required
 def add_marker():
-    data = request.get_json()
-    user_id = get_jwt_identity()
-    user = User.query.get(user_id)
-
-    if not user or not user.is_admin:
+    if not current_user.is_admin:
         return jsonify({'error': 'Unauthorized'}), 403
 
+    data = request.get_json()
     new_marker = Location(
         name=data['name'],
         lat=data['lat'],
@@ -43,12 +38,9 @@ def add_marker():
     return jsonify({'message': 'Marker added successfully'}), 200
 
 @map_views.route('/delete-marker/<int:id>', methods=['DELETE'])
-@jwt_required()
+@login_required
 def delete_marker(id):
-    user_id = get_jwt_identity()
-    user = User.query.get(user_id)
-
-    if not user or not user.is_admin:
+    if not current_user.is_admin:
         return jsonify({'error': 'Unauthorized'}), 403
 
     marker = Location.query.get(id)
