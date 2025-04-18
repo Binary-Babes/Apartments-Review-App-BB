@@ -65,14 +65,16 @@
       zoom: 16,
     });
 
-    fetch('/map-data')
-      .then(response => response.json())
-      .then(locations => {
-        locations.forEach(loc => createMarker(loc));
-        document.querySelectorAll('.filter').forEach(cb => {
-          cb.addEventListener('change', filterMarkers);
-        });
+    fetch('/map-data', {
+      credentials: "include"
+    })
+    .then(response => response.json())
+    .then(locations => {
+      locations.forEach(loc => createMarker(loc));
+      document.querySelectorAll('.filter').forEach(cb => {
+        cb.addEventListener('change', filterMarkers);
       });
+    });
   }
 
   function createMarker(loc) {
@@ -119,24 +121,26 @@
 
     fetch("/add-marker", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",  // ✅ Enables session cookie
+      headers: {
+        "Content-Type": "application/json"
+      },
+      credentials: "include", // ✅ Ensures JWT cookie is sent
       body: JSON.stringify({ name, lat, lng, faculty, type })
     })
     .then(res => {
       if (res.ok) location.reload();
-      else alert("Failed to add marker.");
+      else res.json().then(data => alert(data.error || "Failed to add marker."));
     });
   }
 
   function deleteMarker(id) {
     fetch(`/delete-marker/${id}`, {
       method: "DELETE",
-      credentials: "include" // ✅ Enables session cookie
+      credentials: "include" // ✅ Ensures JWT cookie is sent
     })
     .then(res => {
       if (res.ok) location.reload();
-      else alert("Failed to delete marker.");
+      else res.json().then(data => alert(data.error || "Failed to delete marker."));
     });
   }
 </script>
