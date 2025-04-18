@@ -3,31 +3,125 @@
 <head>
   <meta charset="UTF-8">
   <title>{% block title %}UWI Maps{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Optional Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+
+    header {
+      background-color: #007bff;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+      color: white;
+    }
+
+    nav a {
+  color: white;
+  text-decoration: none;
+  margin-left: 20px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border: 1px solid white;
+  border-radius: 20px;
+  font-family: "Times New Roman", Times, serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+nav a:hover {
+  background-color: white;
+  color: #007bff;
+  text-decoration: none;
+}
+
+
+    main {
+      padding: 2rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 14px;
+      background-color: #eee;
+      margin-top: 2rem;
+    }
+
+    /* ===== Marker Info Box Styling ===== */
+    .gm-style-iw {
+      max-width: 250px !important;
+      font-family: 'Roboto', sans-serif;
+      padding: 12px;
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .gm-style-iw h4 {
+      margin: 0 0 6px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .gm-style-iw p {
+      margin: 4px 0;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .gm-style-iw button {
+      margin-top: 8px;
+      padding: 6px 12px;
+      border: none;
+      background-color: #e74c3c;
+      color: white;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .gm-style-iw button:hover {
+      background-color: #c0392b;
+    }
+  </style>
 </head>
 <body>
-  <nav>
-    <h2>{% block page %}{% endblock %}</h2>
-    {% if is_authenticated %}
-      <span>Welcome, {{ current_user.username }}</span>
-      <a href="{{ url_for('auth_views.logout') }}">Logout</a>
-    {% else %}
-      <a href="{{ url_for('auth_views.login_page') }}">Login</a>
-    {% endif %}
-  </nav>
-
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      <ul id="messages">
-        {% for message in messages %}
-          <li>{{ message }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
-  {% endwith %}
+  <header>
+    <h1>#UWI MApps</h1>
+    <nav>
+      {% if is_authenticated %}
+        <span>Welcome, {{ current_user.username }}!</span>
+        <a href="{{ url_for('auth_views.logout') }}">Logout</a>
+      {% else %}
+        <a href="{{ url_for('auth_views.login_page') }}">Login</a>
+      {% endif %}
+    </nav>
+  </header>
 
   <main>
+    <h2>{% block page %}{% endblock %}</h2>
     {% block content %}{% endblock %}
   </main>
+
+  <footer>
+    &copy; {{ current_year or 2025 }} UWI STA Campus Map Project
+  </footer>
 </body>
 </html>
