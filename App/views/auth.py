@@ -65,3 +65,8 @@ def add_auth_context(app):
             current_user=current_user,
             is_admin=getattr(current_user, 'is_admin', False)
         )
+
+@auth_views.app_errorhandler(401)
+def handle_unauthorized(error):
+    flash("Session expired. Please log in again.")
+    return redirect(url_for('auth_views.login_page'))
