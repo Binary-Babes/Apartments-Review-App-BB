@@ -22,9 +22,8 @@ def load_config(app, overrides):
     app.config['FLASK_ADMIN_SWATCH'] = 'darkly'
 
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
-        'DATABASE_URL',
-        'postgresql://uwi_maps_db_user:38PY1JiZQJm8Ik5P6vxuDnWb41adWAzA@<IP_ADDRESS>/uwi_maps_db'
+        'SQLALCHEMY_DATABASE_URI',
+        'postgresql://uwi_maps_db_user:38PY1JiZQJm8Ik5P6vxuDnWb41adWAzA@dpg-d00400vgi27c73atjo9g-a/uwi_maps_db'
     )
-
     for key in overrides:
         app.config[key] = overrides[key]
