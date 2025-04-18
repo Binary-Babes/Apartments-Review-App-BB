@@ -1,6 +1,7 @@
 # App/controllers/marker.py
 
 from flask import Blueprint, request, jsonify
+from flask_login import login_required  # ✅ Use Flask-Login
 from App.database import db
 from App.models.location import Location
 
@@ -21,6 +22,7 @@ def get_markers():
     ])
 
 @marker_views.route('/add-marker', methods=['POST'])
+@login_required  # ✅ Protect with Flask-Login
 def add_marker():
     data = request.get_json()
     try:
@@ -39,6 +41,7 @@ def add_marker():
         return jsonify({"error": "Could not add marker"}), 400
 
 @marker_views.route('/delete-marker/<int:id>', methods=['DELETE'])
+@login_required  # ✅ Protect with Flask-Login
 def delete_marker(id):
     marker = Location.query.get(id)
     if not marker:

@@ -54,7 +54,7 @@
 
 <script>
   const isAdmin = {{ 'true' if is_admin else 'false' }};
-  console.log("Admin mode:", isAdmin); // 🐞 DEBUG CHECK
+  console.log("Admin mode:", isAdmin);
 
   let map;
   let allMarkers = [];
@@ -85,8 +85,7 @@
     marker.faculty = loc.faculty;
     marker.id = loc.id;
 
-    let content = `<strong>${loc.name}</strong><br>Type: ${loc.type}<br>Faculty: ${loc.faculty};`;
-
+    let content = `<strong>${loc.name}</strong><br>Type: ${loc.type}<br>Faculty: ${loc.faculty}`;
     if (isAdmin) {
       content += `<br><button onclick="deleteMarker(${loc.id})">Delete</button>`;
     }
@@ -121,6 +120,7 @@
     fetch("/add-marker", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",  // ✅ Enables session cookie
       body: JSON.stringify({ name, lat, lng, faculty, type })
     })
     .then(res => {
@@ -130,11 +130,14 @@
   }
 
   function deleteMarker(id) {
-    fetch(`/delete-marker/${id}`, { method: "DELETE" })
-      .then(res => {
-        if (res.ok) location.reload();
-        else alert("Failed to delete marker.");
-      });
+    fetch(`/delete-marker/${id}`, {
+      method: "DELETE",
+      credentials: "include" // ✅ Enables session cookie
+    })
+    .then(res => {
+      if (res.ok) location.reload();
+      else alert("Failed to delete marker.");
+    });
   }
 </script>
 

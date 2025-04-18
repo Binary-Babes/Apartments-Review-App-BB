@@ -10,7 +10,7 @@ from App.config import load_config
 from App.controllers import setup_jwt, add_auth_context
 from App.views import views, setup_admin
 from App.views.map import map_views
-from App.controllers.marker import marker_views  # ✅ Import marker blueprint
+from App.controllers.marker import marker_views
 from flask_login import LoginManager
 from App.models.user import User
 
@@ -27,15 +27,14 @@ def create_app(overrides={}):
     photos = UploadSet('photos', TEXT + DOCUMENTS + IMAGES)
     configure_uploads(app, photos)
 
-    add_views(app)
+    add_views(app)  # auth_views is already included here via __init__.py
     app.register_blueprint(map_views)
-    app.register_blueprint(marker_views)  # ✅ Register marker blueprint
+    app.register_blueprint(marker_views)
 
     init_db(app)
     jwt = setup_jwt(app)
     setup_admin(app)
 
-    # ✅ Flask-Login setup
     login_manager = LoginManager()
 
     @login_manager.user_loader
@@ -43,6 +42,8 @@ def create_app(overrides={}):
         return User.query.get(int(user_id))
 
     login_manager.init_app(app)
+    login_manager.login_view = 'auth_views.login'
+
 
     @jwt.invalid_token_loader
     @jwt.unauthorized_loader
