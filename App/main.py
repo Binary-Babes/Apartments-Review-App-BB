@@ -23,10 +23,6 @@ def create_app(overrides={}):
     CORS(app)
     add_auth_context(app)
 
-    # Uploads
-    uploads = UploadSet('uploads', TEXT + DOCUMENTS + IMAGES)
-    configure_uploads(app, uploads)
-
     # Register all views
     add_views(app)
 
@@ -34,7 +30,7 @@ def create_app(overrides={}):
     init_db(app)
 
     # Initialize data (create bob and prem)
-    initialize(app)  # ✅ Pass the app context
+    initialize(app)
 
     # JWT setup
     jwt = setup_jwt(app)

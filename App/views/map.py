@@ -34,7 +34,7 @@ def add_marker():
         type=data['type']
     )
     db.session.add(new_marker)
-    db.session.commit()
+    db.session.commit()  # Ensure changes are committed to the database
     return jsonify({'message': 'Marker added successfully'}), 200
 
 @map_views.route('/delete-marker/<int:id>', methods=['DELETE'])
@@ -48,5 +48,5 @@ def delete_marker(id):
         return jsonify({'error': 'Marker not found'}), 404
 
     db.session.delete(marker)
-    db.session.commit()
+    db.session.commit()  # Ensure changes are committed to the database
     return jsonify({'message': 'Marker deleted successfully'}), 200
