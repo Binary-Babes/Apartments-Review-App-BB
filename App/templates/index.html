@@ -236,22 +236,12 @@
     fetch('/map-data', {
       credentials: "include"
     })
-    .then(response => {
-      if (response.status === 401) {
-        alert("Session expired. Redirecting to login.");
-        window.location.href = "/login";
-        return [];
-      }
-      return response.json();
-    })
+    .then(response => response.json())
     .then(locations => {
       locations.forEach(loc => createMarker(loc));
       document.querySelectorAll('.filter').forEach(cb => {
         cb.addEventListener('change', filterMarkers);
       });
-    })
-    .catch(error => {
-      console.error("Error fetching map data:", error);
     });
   }
 
