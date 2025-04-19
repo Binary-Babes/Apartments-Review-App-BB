@@ -12,7 +12,7 @@ from App.config import load_config
 from App.controllers import setup_jwt, add_auth_context
 from App.views import views
 from App.models.user import User
-from App.controllers.initialize import initialize  # ✅ Corrected import path
+from App.controllers.initialize import initialize  
 
 def add_views(app):
     for view in views:
@@ -24,7 +24,6 @@ def create_app(overrides={}):
     CORS(app)
     add_auth_context(app)
 
-    # Log database connection errors
     @app.before_first_request
     def test_db_connection():
         try:
@@ -32,19 +31,18 @@ def create_app(overrides={}):
         except Exception as e:
             app.logger.error(f"Database connection failed: {e}")
 
-    # Register all views
+
     add_views(app)
 
-    # Init DB
+
     init_db(app)
 
-    # Initialize data (create bob and prem)
     initialize(app)
 
-    # JWT setup
+
     jwt = setup_jwt(app)
 
-    # Flask-Login setup
+    
     login_manager = LoginManager()
 
     @login_manager.user_loader
