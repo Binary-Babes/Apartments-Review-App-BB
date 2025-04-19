@@ -18,13 +18,7 @@ def load_config(app, overrides):
     app.config["JWT_TOKEN_LOCATION"] = ["cookies", "headers"]
     app.config["JWT_COOKIE_SECURE"] = True
     app.config["JWT_COOKIE_CSRF_PROTECT"] = False
-    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 3600  # Set to 1 hour or adjust as needed
     app.config['FLASK_ADMIN_SWATCH'] = 'darkly'
-
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
-        'DATABASE_URL',
-        'postgresql://uwi_maps_db_user:38PY1JiZQJm8Ik5P6vxuDnWb41adWAzA@<IP_ADDRESS>/uwi_maps_db'
-    )
 
     for key in overrides:
         app.config[key] = overrides[key]

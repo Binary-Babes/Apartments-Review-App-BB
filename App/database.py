@@ -9,5 +9,4 @@ def init_db(app):
     migrate.init_app(app, db)
 
 def create_db():
-    with db.engine.connect() as connection:
-        db.create_all(bind=connection)
+    db.create_all()
