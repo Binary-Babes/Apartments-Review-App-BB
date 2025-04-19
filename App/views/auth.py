@@ -1,67 +1,72 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import login_user, logout_user, current_user
-from flask_jwt_extended import (
-    create_access_token, JWTManager
+from flask import Blueprint, render_template, jsonify, request, flash, send_from_directory, flash, redirect, url_for
+from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, set_access_cookies
+
+
+from.index import index_views
+
+from App.controllers import (
+    login
 )
-from App.models import User
 
 auth_views = Blueprint('auth_views', __name__, template_folder='../templates')
 
-# ✅ GET login form
-@auth_views.route('/login', methods=['GET'])
-def login_page():
-    return render_template('login.html')
 
-# ✅ POST login logic
+
+
+'''
+Page/Action Routes
+'''    
+@auth_views.route('/users', methods=['GET'])
+def get_user_page():
+    users = get_all_users()
+    return render_template('users.html', users=users)
+
+@auth_views.route('/identify', methods=['GET'])
+@jwt_required()
+def identify_page():
+    return render_template('message.html', title="Identify", message=f"You are logged in as {current_user.id} - {current_user.username}")
+    
+
 @auth_views.route('/login', methods=['POST'])
 def login_action():
-    username = request.form.get('username')
-    password = request.form.get('password')
-    user = User.query.filter_by(username=username).first()
-
-    if user and user.check_password(password):
-        login_user(user)
-        flash("Login successful.")
-        return redirect(url_for('index_views.index_page'))
+    data = request.form
+    token = login(data['username'], data['password'])
+    response = redirect(request.referrer)
+    if not token:
+        flash('Bad username or password given'), 401
     else:
-        flash("Invalid username or password.")
-        return render_template('login.html')
+        flash('Login Successful')
+        set_access_cookies(response, token) 
+    return response
 
-# ✅ Logout redirects to correct endpoint
-@auth_views.route('/logout')
-def logout():
-    logout_user()
-    flash("Logged out.")
-    return redirect(url_for('auth_views.login_page'))  # ✅ FIXED
+@auth_views.route('/logout', methods=['GET'])
+def logout_action():
+    response = redirect(request.referrer) 
+    flash("Logged Out!")
+    unset_jwt_cookies(response)
+    return response
 
-# ✅ Optional: JWT login for APIs
-def login_jwt(username, password):
-    user = User.query.filter_by(username=username).first()
-    if user and user.check_password(password):
-        return create_access_token(identity=username)
-    return None
+'''
+API Routes
+'''
 
-def setup_jwt(app):
-    jwt = JWTManager(app)
+@auth_views.route('/api/login', methods=['POST'])
+def user_login_api():
+  data = request.json
+  token = login(data['username'], data['password'])
+  if not token:
+    return jsonify(message='bad username or password given'), 401
+  response = jsonify(access_token=token) 
+  set_access_cookies(response, token)
+  return response
 
-    @jwt.user_identity_loader
-    def user_identity_lookup(identity):
-        user = User.query.filter_by(username=identity).one_or_none()
-        return user.id if user else None
+@auth_views.route('/api/identify', methods=['GET'])
+@jwt_required()
+def identify_user():
+    return jsonify({'message': f"username: {current_user.username}, id : {current_user.id}"})
 
-    @jwt.user_lookup_loader
-    def user_lookup_callback(_jwt_header, jwt_data):
-        identity = jwt_data["sub"]
-        return User.query.get(identity)
-
-    return jwt
-
-# ✅ Template context injection
-def add_auth_context(app):
-    @app.context_processor
-    def inject_user():
-        return dict(
-            is_authenticated=current_user.is_authenticated,
-            current_user=current_user,
-            is_admin=getattr(current_user, 'is_admin', False)
-        )
+@auth_views.route('/api/logout', methods=['GET'])
+def logout_api():
+    response = jsonify(message="Logged Out!")
+    unset_jwt_cookies(response)
+    return response
