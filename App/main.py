@@ -5,7 +5,6 @@ from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 from flask_login import LoginManager
-import logging
 
 from App.database import init_db
 from App.config import load_config
@@ -23,14 +22,6 @@ def create_app(overrides={}):
     load_config(app, overrides)
     CORS(app)
     add_auth_context(app)
-
-    # Log database connection errors
-    @app.before_first_request
-    def test_db_connection():
-        try:
-            db.session.execute('SELECT 1')
-        except Exception as e:
-            app.logger.error(f"Database connection failed: {e}")
 
     # Register all views
     add_views(app)
