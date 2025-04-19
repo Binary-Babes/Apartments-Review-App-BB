@@ -26,7 +26,7 @@ class User(db.Model):
             'is_admin': self.is_admin
         }
 
-    # ✅ Required by Flask-Login
+   
     @property
     def is_authenticated(self):
         return True

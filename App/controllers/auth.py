@@ -36,5 +36,4 @@ def add_auth_context(app):
             is_admin=getattr(current_user, 'is_admin', False)
         )
 
-# If you had a redirect to login here (e.g., post-logout or error handling), it would be:
-# return redirect(url_for('auth_views.login_page'))  ✅ not .login
+

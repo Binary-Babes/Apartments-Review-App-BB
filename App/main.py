@@ -11,7 +11,8 @@ from App.config import load_config
 from App.controllers import setup_jwt, add_auth_context
 from App.views import views
 from App.models.user import User
-from App.controllers.initialize import initialize  # ✅ Corrected import path
+from App.controllers.initialize import initialize  
+from App.controllers.marker import initialize_markers  
 
 def add_views(app):
     for view in views:
@@ -23,23 +24,23 @@ def create_app(overrides={}):
     CORS(app)
     add_auth_context(app)
 
-    # Uploads
+   
     uploads = UploadSet('uploads', TEXT + DOCUMENTS + IMAGES)
     configure_uploads(app, uploads)
 
-    # Register all views
+ 
     add_views(app)
 
-    # Init DB
+   
     init_db(app)
 
-    # Initialize data (create bob and prem)
-    initialize(app)  # ✅ Pass the app context
+   
+    initialize(app)  
+    initialize_markers(app)  
 
-    # JWT setup
+    
     jwt = setup_jwt(app)
 
-    # Flask-Login setup
     login_manager = LoginManager()
 
     @login_manager.user_loader

@@ -11,7 +11,7 @@ def load_config(app, overrides):
     app.config['TEMPLATES_AUTO_RELOAD'] = True
     app.config['PREFERRED_URL_SCHEME'] = 'https'
 
-    # ✅ Corrected for UploadSet name = 'uploads'
+    
     app.config['UPLOADED_UPLOADS_DEST'] = "App/uploads"
 
     app.config['JWT_ACCESS_COOKIE_NAME'] = 'access_token'

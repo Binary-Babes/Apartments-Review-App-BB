@@ -2,7 +2,7 @@ from App.controllers.user import create_user
 from App.database import db
 
 def initialize(app):
-    with app.app_context():  # ✅ Use passed-in app context
+    with app.app_context():  
         db.drop_all()
         db.create_all()
 
